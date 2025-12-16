@@ -7,34 +7,34 @@ datasource db {
 	url      = env("DATABASE_URL")
 }
 
-model Folder {
+model folder {
 	id          String    @id @default(cuid())
 	parentId    String?
-	parent      Folder?   @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-	children    Folder[]  @relation("FolderHierarchy")
+	parent      folder?   @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+	children    folder[]  @relation("FolderHierarchy")
 	title       String
 	description String?
 	color       String?
 	position    Int       @default(0)
-	pages       Page[]
+	pages       page[]
 	createdAt   DateTime   @default(now())
 	updatedAt   DateTime   @updatedAt
 
 	@@index([parentId, position])
 }
 
-model Page {
+model page {
 	id          String       @id @default(cuid())
 	folderId    String?
-	folder      Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+	folder      folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
 	title       String
 	slug        String?      @unique
 	position    Int          @default(0)
 	searchText  String       @default("")
 	isPinned    Boolean      @default(false)
 	isArchived  Boolean      @default(false)
-	content     PageContent?
-	revisions   PageRevision[]
+	content     pagecontent?
+	revisions   pagerevision[]
 	createdAt   DateTime     @default(now())
 	updatedAt   DateTime     @updatedAt
 
@@ -42,7 +42,7 @@ model Page {
 	@@index([searchText])
 }
 
-model PageContent {
+model pagecontent {
 	id         String   @id @default(cuid())
 	pageId     String   @unique
 	html       String   @default("")
@@ -51,20 +51,20 @@ model PageContent {
 	canvasJson String?
 	createdAt  DateTime @default(now())
 	updatedAt  DateTime @updatedAt
-	page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+	page       page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
 }
 
-model PageRevision {
+model pagerevision {
 	id        String   @id @default(cuid())
 	pageId    String
-	page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+	page      page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
 	snapshot  String
 	createdAt DateTime @default(now())
 
 	@@index([pageId, createdAt])
 }
 
-model SyncState {
+model syncstate {
 	id           String   @id @default(cuid())
 	clientId     String
 	cursor       String   @unique
@@ -75,7 +75,7 @@ model SyncState {
 	@@unique([clientId])
 }
 
-model ChangeLog {
+model changelog {
 	id         String   @id @default(cuid())
 	entityType String
 	entityId   String
