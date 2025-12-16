@@ -1,88 +1,84 @@
 generator client {
-	provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-	provider = "mysql"
-	url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model folder {
-	id          String    @id @default(cuid())
-	parentId    String?
-	parent      folder?   @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-	children    folder[]  @relation("FolderHierarchy")
-	title       String
-	description String?
-	color       String?
-	position    Int       @default(0)
-	pages       page[]
-	createdAt   DateTime   @default(now())
-	updatedAt   DateTime   @updatedAt
+  id          String   @id @default(cuid())
+  parentId    String?
+  title       String   @db.Text
+  description String?  @db.Text
+  color       String?  @db.Text
+  position    Int      @default(0)
+  createdAt   BigInt
+  updatedAt   DateTime   @updatedAt
+  parent      folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  children    folder[] @relation("FolderHierarchy")
+  pages       page[]
 
-	@@index([parentId, position])
+  @@index([parentId], map: "folder_parentId_fkey")
 }
 
 model page {
-	id          String       @id @default(cuid())
-	folderId    String?
-	folder      folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
-	title       String
-	slug        String?      @unique
-	position    Int          @default(0)
-	searchText  String       @default("")
-	isPinned    Boolean      @default(false)
-	isArchived  Boolean      @default(false)
-	content     pagecontent?
-	revisions   pagerevision[]
-	createdAt   DateTime     @default(now())
-	updatedAt   DateTime     @updatedAt
+  id         String         @id @default(cuid())
+  folderId   String?
+  title      String         @db.Text
+  slug       String?        @db.Text
+  position   Int            @default(0)
+  searchText String         @default("") @db.Text
+  isPinned   Boolean        @default(false)
+  isArchived Boolean        @default(false)
+  createdAt  BigInt
+  updatedAt  DateTime         @updatedAt
+  folder     folder?        @relation(fields: [folderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  content    pagecontent[]
+  revisions  pagerevision[]
 
-	@@index([folderId, position])
-	@@index([searchText])
+  @@index([folderId], map: "page_folderId_fkey")
 }
 
 model pagecontent {
-	id         String   @id @default(cuid())
-	pageId     String   @unique
-	html       String   @default("")
-	json       String?
-	text       String   @default("")
-	canvasJson String?
-	createdAt  DateTime @default(now())
-	updatedAt  DateTime @updatedAt
-	page       page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id         String  @id @default(cuid())
+  pageId     String
+  html       String? @db.LongText
+  json       String? @db.LongText
+  text       String? @db.LongText
+  canvasJson String? @db.LongText
+  createdAt  BigInt
+  updatedAt  DateTime  @updatedAt
+  page       page    @relation(fields: [pageId], references: [id], onUpdate: Restrict)
+
+  @@index([pageId], map: "pagecontent_pageId_fkey")
 }
 
 model pagerevision {
-	id        String   @id @default(cuid())
-	pageId    String
-	page      page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
-	snapshot  String
-	createdAt DateTime @default(now())
+  id        String @id @default(cuid())
+  pageId    String
+  snapshot  String @db.LongText
+  createdAt BigInt
+  page      page   @relation(fields: [pageId], references: [id], onUpdate: Restrict)
 
-	@@index([pageId, createdAt])
+  @@index([pageId], map: "pagerevision_pageId_fkey")
 }
 
 model syncstate {
-	id           String   @id @default(cuid())
-	clientId     String
-	cursor       String   @unique
-	lastSyncedAt DateTime @default(now())
-	createdAt    DateTime @default(now())
-	updatedAt    DateTime @updatedAt
-
-	@@unique([clientId])
+  id           String @id @default(cuid())
+  clientId     String @db.Text
+  cursor       String @db.Text
+  lastSyncedAt String @default(dbgenerated("(current_timestamp())")) @db.Text
+  createdAt    String @default(dbgenerated("(current_timestamp())")) @db.Text
+  updatedAt    DateTime @updatedAt
 }
 
 model changelog {
-	id         String   @id @default(cuid())
-	entityType String
-	entityId   String
-	action     String
-	payload    String
-	createdAt  DateTime @default(now())
-
-	@@index([entityType, entityId])
-	@@index([createdAt])
+  id         String @id @default(cuid())
+  entityType String @db.Text
+  entityId   String @db.Text
+  action     String @db.Text
+  payload    String @db.Text
+  createdAt  String @default(dbgenerated("(current_timestamp())")) @db.Text
 }

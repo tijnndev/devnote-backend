@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 import { createFolder, deleteFolder, updateFolder } from '../services/noteService.js';
+import { serializeBigInt } from '../lib/serialize';
 
 const baseSchema = z.object({
 	title: z.string().min(1),
@@ -24,7 +25,7 @@ foldersRouter.post('/', async (req, res, next) => {
 	try {
 		const payload = createFolderSchema.parse(req.body);
 		const folder = await createFolder(payload);
-		res.status(201).json({ folder });
+		res.status(201).json({ folder: serializeBigInt(folder) });
 	} catch (error) {
 		next(error);
 	}
@@ -34,7 +35,7 @@ foldersRouter.patch('/:folderId', async (req, res, next) => {
 	try {
 		const payload = updateFolderSchema.parse(req.body);
 		const folder = await updateFolder(req.params.folderId, payload);
-		res.json({ folder });
+		res.json({ folder: serializeBigInt(folder) });
 	} catch (error) {
 		next(error);
 	}

@@ -1,13 +1,14 @@
 import { Router } from 'express';
 
 import { getFolder, getWorkspaceTree } from '../services/noteService.js';
+import { serializeBigInt } from '../lib/serialize';
 
 export const workspaceRouter = Router();
 
 workspaceRouter.get('/tree', async (_req, res, next) => {
 	try {
 		const tree = await getWorkspaceTree();
-		res.json({ tree });
+		res.json({ tree: serializeBigInt(tree) });
 	} catch (error) {
 		next(error);
 	}
@@ -22,7 +23,7 @@ workspaceRouter.get('/folders/:folderId', async (req, res, next) => {
 			return;
 		}
 
-		res.json({ folder });
+		res.json({ folder: serializeBigInt(folder) });
 	} catch (error) {
 		next(error);
 	}

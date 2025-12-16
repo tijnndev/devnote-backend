@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 import { fetchChanges, getSyncState, upsertSyncState } from '../services/noteService.js';
+import { serializeBigInt } from '../lib/serialize';
 
 const checkpointSchema = z.object({
   clientId: z.string().min(3),
@@ -50,7 +51,7 @@ syncRouter.get('/changes', async (req, res, next) => {
     const changes = await fetchChanges(after, limit ?? 100);
     const nextCursor = changes.at(-1)?.createdAt?.toISOString();
 
-    res.json({ changes, cursor: nextCursor });
+    res.json({ changes: serializeBigInt(changes), cursor: nextCursor });
   } catch (error) {
     next(error);
   }
