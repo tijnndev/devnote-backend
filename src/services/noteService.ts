@@ -487,34 +487,35 @@ export async function getSyncState(clientId: string) {
 }
 
 // TODO: Implement notebook/section functionality (currently unused)
-export async function createNotebook(_input: unknown) {
-  throw new Error('Not implemented');
+// These are stub implementations to satisfy TypeScript - the routes exist but aren't registered
+export async function createNotebook(_input: unknown): Promise<unknown> {
+  throw new Error('Notebook functionality not implemented');
 }
 
-export async function getNotebook(_id: string) {
-  throw new Error('Not implemented');
+export async function getNotebook(_id: string): Promise<unknown | null> {
+  return null;
 }
 
-export async function getNotebookTree() {
-  throw new Error('Not implemented');
+export async function getNotebookTree(): Promise<unknown[]> {
+  return [];
 }
 
-export async function updateNotebook(_id: string, _input: unknown) {
-  throw new Error('Not implemented');
+export async function updateNotebook(_id: string, _input: unknown): Promise<unknown | null> {
+  return null;
 }
 
-export async function deleteNotebook(_id: string) {
-  throw new Error('Not implemented');
+export async function deleteNotebook(_id: string): Promise<void> {
+  throw new Error('Notebook functionality not implemented');
 }
 
-export async function createSection(_notebookId: string, _input: unknown) {
-  throw new Error('Not implemented');
+export async function createSection(_notebookId: string, _input: unknown): Promise<unknown> {
+  throw new Error('Section functionality not implemented');
 }
 
-export async function updateSection(_id: string, _input: unknown) {
-  throw new Error('Not implemented');
+export async function updateSection(_id: string, _input: unknown): Promise<unknown | null> {
+  return null;
 }
 
-export async function deleteSection(_id: string) {
-  throw new Error('Not implemented');
+export async function deleteSection(_id: string): Promise<void> {
+  throw new Error('Section functionality not implemented');
 }
