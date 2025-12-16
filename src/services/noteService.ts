@@ -429,8 +429,8 @@ export async function searchPages(query: string, limit = 20) {
 
   const rows = (await prisma.$queryRawUnsafe(
     `SELECT p.id, p.title, substr(p.searchText, instr(lower(p.searchText), ?), 120) as snippet, p.folderId, f.title as folderTitle
-     FROM page p
-     LEFT JOIN folder f ON f.id = p.folderId
+     FROM Page p
+     LEFT JOIN Folder f ON f.id = p.folderId
      WHERE lower(p.searchText) LIKE ?
      ORDER BY p.updatedAt DESC
      LIMIT ?`,
