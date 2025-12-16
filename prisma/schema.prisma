@@ -35,7 +35,7 @@ model page {
   createdAt  BigInt         @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
   updatedAt  DateTime       @updatedAt
   folder     folder?        @relation(fields: [folderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  content    pagecontent[]
+  content    pagecontent?
   revisions  pagerevision[]
 
   @@index([folderId], map: "page_folderId_fkey")
