@@ -27,12 +27,12 @@ if (!globalState.__DEVNOTE_MIGRATED__) {
 }
 
 beforeEach(async () => {
-  await prisma.pageRevision.deleteMany();
-  await prisma.pageContent.deleteMany();
+  await prisma.pagerevision.deleteMany();
+  await prisma.pagecontent.deleteMany();
   await prisma.page.deleteMany();
   await prisma.folder.deleteMany();
-  await prisma.syncState.deleteMany();
-  await prisma.changeLog.deleteMany();
+  await prisma.syncstate.deleteMany();
+  await prisma.changelog.deleteMany();
 });
 
 afterAll(async () => {

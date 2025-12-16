@@ -113,7 +113,7 @@ async function logChange(
   action: keyof typeof CHANGE_ACTIONS,
   payload: unknown
 ) {
-  await tx.changeLog.create({
+  await tx.changelog.create({
     data: {
       entityType: CHANGE_TYPES[entityType],
       entityId,
@@ -200,10 +200,10 @@ async function upsertPageContent(
   const json = serialiseJson(content.json);
   const canvasJson = serialiseJson(content.canvas);
 
-  const existing = await tx.pageContent.findUnique({ where: { pageId } });
+  const existing = await tx.pagecontent.findUnique({ where: { pageId } });
 
   if (existing) {
-    const updated = await tx.pageContent.update({
+    const updated = await tx.pagecontent.update({
       where: { pageId },
       data: {
         html,
@@ -217,7 +217,7 @@ async function upsertPageContent(
     return updated;
   }
 
-  const created = await tx.pageContent.create({
+  const created = await tx.pagecontent.create({
     data: {
       pageId,
       html,
@@ -382,7 +382,7 @@ export async function updatePage(id: string, input: UpdatePageInput) {
 
 export async function deletePage(id: string) {
   return prisma.$transaction(async (tx) => {
-    await tx.pageContent.delete({ where: { pageId: id } }).catch(() => undefined);
+    await tx.pagecontent.delete({ where: { pageId: id } }).catch(() => undefined);
     const page = await tx.page.delete({ where: { id } });
 
     await logChange(tx, 'page', id, 'delete', { id });
@@ -408,7 +408,7 @@ export async function getPage(id: string) {
 }
 
 export async function recordRevision(pageId: string, snapshot: unknown) {
-  return prisma.pageRevision.create({
+  return prisma.pagerevision.create({
     data: {
       pageId,
       snapshot: serialiseJson(snapshot) ?? '{}'
@@ -417,7 +417,7 @@ export async function recordRevision(pageId: string, snapshot: unknown) {
 }
 
 export async function listPageRevisions(pageId: string, limit = 20) {
-  return prisma.pageRevision.findMany({
+  return prisma.pagerevision.findMany({
     where: { pageId },
     orderBy: { createdAt: 'desc' },
     take: limit
@@ -452,7 +452,7 @@ export async function searchPages(query: string, limit = 20) {
 }
 
 export async function fetchChanges(after?: string, limit = 100) {
-  return prisma.changeLog.findMany({
+  return prisma.changelog.findMany({
     where: after
       ? {
           createdAt: {
@@ -466,7 +466,7 @@ export async function fetchChanges(after?: string, limit = 100) {
 }
 
 export async function upsertSyncState(clientId: string, cursor: string) {
-  return prisma.syncState.upsert({
+  return prisma.syncstate.upsert({
     where: { clientId },
     create: {
       clientId,
