@@ -14,7 +14,7 @@ model folder {
   description String?  @db.Text
   color       String?  @db.Text
   position    Int      @default(0)
-  createdAt   BigInt   @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   parent      folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   children    folder[] @relation("FolderHierarchy")
@@ -32,10 +32,10 @@ model page {
   searchText String         @default("") @db.Text
   isPinned   Boolean        @default(false)
   isArchived Boolean        @default(false)
-  createdAt  BigInt         @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
+  createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   folder     folder?        @relation(fields: [folderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-  content    pagecontent?
+  content    pagecontent[]
   revisions  pagerevision[]
 
   @@index([folderId], map: "page_folderId_fkey")
@@ -48,7 +48,7 @@ model pagecontent {
   json       String?  @db.LongText
   text       String?  @db.LongText
   canvasJson String?  @db.LongText
-  createdAt  BigInt   @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
+  createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   page       page     @relation(fields: [pageId], references: [id], onUpdate: Restrict)
 
@@ -56,11 +56,11 @@ model pagecontent {
 }
 
 model pagerevision {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   pageId    String
-  snapshot  String @db.LongText
-  createdAt BigInt @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
-  page      page   @relation(fields: [pageId], references: [id], onUpdate: Restrict)
+  snapshot  String   @db.LongText
+  createdAt DateTime @default(now())
+  page      page     @relation(fields: [pageId], references: [id], onUpdate: Restrict)
 
   @@index([pageId], map: "pagerevision_pageId_fkey")
 }
@@ -69,16 +69,16 @@ model syncstate {
   id           String   @id @default(cuid())
   clientId     String   @unique @db.VarChar(255)
   cursor       String   @db.Text
-  lastSyncedAt String   @default(dbgenerated("(current_timestamp())")) @db.Text
-  createdAt    String   @default(dbgenerated("(current_timestamp())")) @db.Text
+  lastSyncedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model changelog {
-  id         String @id @default(cuid())
-  entityType String @db.Text
-  entityId   String @db.Text
-  action     String @db.Text
-  payload    String @db.Text
-  createdAt  String @default(dbgenerated("(current_timestamp())")) @db.Text
+  id         String   @id @default(cuid())
+  entityType String   @db.Text
+  entityId   String   @db.Text
+  action     String   @db.Text
+  payload    String   @db.Text
+  createdAt  DateTime @default(now())
 }

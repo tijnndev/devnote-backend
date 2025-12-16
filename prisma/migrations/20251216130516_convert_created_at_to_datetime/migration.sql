@@ -6,7 +6,7 @@ CREATE TABLE `folder` (
     `description` TEXT NULL,
     `color` TEXT NULL,
     `position` INTEGER NOT NULL DEFAULT 0,
-    `createdAt` BIGINT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     INDEX `folder_parentId_fkey`(`parentId`),
@@ -23,7 +23,7 @@ CREATE TABLE `page` (
     `searchText` TEXT NOT NULL DEFAULT '',
     `isPinned` BOOLEAN NOT NULL DEFAULT false,
     `isArchived` BOOLEAN NOT NULL DEFAULT false,
-    `createdAt` BIGINT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     INDEX `page_folderId_fkey`(`folderId`),
@@ -38,9 +38,10 @@ CREATE TABLE `pagecontent` (
     `json` LONGTEXT NULL,
     `text` LONGTEXT NULL,
     `canvasJson` LONGTEXT NULL,
-    `createdAt` BIGINT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `pagecontent_pageId_key`(`pageId`),
     INDEX `pagecontent_pageId_fkey`(`pageId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -50,7 +51,7 @@ CREATE TABLE `pagerevision` (
     `id` VARCHAR(191) NOT NULL,
     `pageId` VARCHAR(191) NOT NULL,
     `snapshot` LONGTEXT NOT NULL,
-    `createdAt` BIGINT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `pagerevision_pageId_fkey`(`pageId`),
     PRIMARY KEY (`id`)
@@ -59,12 +60,13 @@ CREATE TABLE `pagerevision` (
 -- CreateTable
 CREATE TABLE `syncstate` (
     `id` VARCHAR(191) NOT NULL,
-    `clientId` TEXT NOT NULL,
+    `clientId` VARCHAR(255) NOT NULL,
     `cursor` TEXT NOT NULL,
-    `lastSyncedAt` TEXT NOT NULL DEFAULT (current_timestamp()),
-    `createdAt` TEXT NOT NULL DEFAULT (current_timestamp()),
+    `lastSyncedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
+    UNIQUE INDEX `syncstate_clientId_key`(`clientId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -75,7 +77,7 @@ CREATE TABLE `changelog` (
     `entityId` TEXT NOT NULL,
     `action` TEXT NOT NULL,
     `payload` TEXT NOT NULL,
-    `createdAt` TEXT NOT NULL DEFAULT (current_timestamp()),
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

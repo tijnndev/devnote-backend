@@ -56,7 +56,7 @@ type FolderTreeNode = {
   color: string | null;
   position: number;
   parentId: string | null;
-  createdAt: bigint;
+  createdAt: Date;
   updatedAt: Date;
   pages: PageWithContent[];
   children: FolderTreeNode[];
@@ -129,7 +129,7 @@ function sortTree(nodes: FolderTreeNode[]) {
     if (a.position !== b.position) {
       return a.position - b.position;
     }
-    return Number(a.createdAt) - Number(b.createdAt);
+    return a.createdAt.getTime() - b.createdAt.getTime();
   });
 
   for (const node of nodes) {
@@ -137,7 +137,7 @@ function sortTree(nodes: FolderTreeNode[]) {
       if (a.position !== b.position) {
         return a.position - b.position;
       }
-      return Number(a.createdAt) - Number(b.createdAt);
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
     sortTree(node.children);
   }
