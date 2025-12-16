@@ -7,12 +7,7 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
 		return next(error);
 	}
 
-	// Log the full error with all properties
-	logger.error('Unhandled application error');
-	console.error('Full error object:', error);
-	console.error('Error message:', error.message);
-	console.error('Error stack:', error.stack);
-	console.error('Error stringified:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+	logger.error({ error }, 'Unhandled application error');
 
 	const statusCode = typeof error.status === 'number' ? error.status : 500;
 	res.status(statusCode).json({

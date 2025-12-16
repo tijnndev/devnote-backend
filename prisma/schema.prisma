@@ -1,85 +1,88 @@
 generator client {
-  provider = "prisma-client-js"
+	provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+	provider = "mysql"
+	url      = env("DATABASE_URL")
 }
 
-model changelog {
-  id         String   @id
-  entityType String
-  entityId   String
-  action     String
-  payload    String   @db.LongText
-  createdAt  DateTime @default(now())
+model Folder {
+	id          String    @id @default(cuid())
+	parentId    String?
+	parent      Folder?   @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+	children    Folder[]  @relation("FolderHierarchy")
+	title       String
+	description String?
+	color       String?
+	position    Int       @default(0)
+	pages       Page[]
+	createdAt   DateTime   @default(now())
+	updatedAt   DateTime   @updatedAt
 
-  @@index([createdAt], map: "ChangeLog_createdAt_idx")
-  @@index([entityType, entityId], map: "ChangeLog_entityType_entityId_idx")
+	@@index([parentId, position])
 }
 
-model folder {
-  id           String   @id
-  parentId     String?
-  title        String
-  description  String?  @db.Text
-  color        String?
-  position     Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
-  folder       folder?  @relation("folderTofolder", fields: [parentId], references: [id], onDelete: Cascade, map: "Folder_parentId_fkey")
-  other_folder folder[] @relation("folderTofolder")
-  page         page[]
+model Page {
+	id          String       @id @default(cuid())
+	folderId    String?
+	folder      Folder?      @relation(fields: [folderId], references: [id], onDelete: SetNull)
+	title       String
+	slug        String?      @unique
+	position    Int          @default(0)
+	searchText  String       @default("")
+	isPinned    Boolean      @default(false)
+	isArchived  Boolean      @default(false)
+	content     PageContent?
+	revisions   PageRevision[]
+	createdAt   DateTime     @default(now())
+	updatedAt   DateTime     @updatedAt
 
-  @@index([parentId, position], map: "Folder_parentId_position_idx")
+	@@index([folderId, position])
+	@@index([searchText])
 }
 
-model page {
-  id           String         @id
-  folderId     String?
-  title        String
-  slug         String?        @unique(map: "Page_slug_key")
-  position     Int            @default(0)
-  searchText   String         @default("") @db.Text
-  isPinned     Boolean        @default(false)
-  isArchived   Boolean        @default(false)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime
-  folder       folder?        @relation(fields: [folderId], references: [id], map: "Page_folderId_fkey")
-  pagecontent  pagecontent?
-  pagerevision pagerevision[]
-
-  @@index([folderId, position], map: "Page_folderId_position_idx")
+model PageContent {
+	id         String   @id @default(cuid())
+	pageId     String   @unique
+	html       String   @default("")
+	json       String?
+	text       String   @default("")
+	canvasJson String?
+	createdAt  DateTime @default(now())
+	updatedAt  DateTime @updatedAt
+	page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
 }
 
-model pagecontent {
-  id         String   @id
-  pageId     String   @unique(map: "PageContent_pageId_key")
-  html       String   @default("") @db.LongText
-  json       String?  @db.LongText
-  text       String   @default("") @db.Text
-  canvasJson String?  @db.LongText
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime
-  page       page     @relation(fields: [pageId], references: [id], onDelete: Cascade, map: "PageContent_pageId_fkey")
+model PageRevision {
+	id        String   @id @default(cuid())
+	pageId    String
+	page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+	snapshot  String
+	createdAt DateTime @default(now())
+
+	@@index([pageId, createdAt])
 }
 
-model pagerevision {
-  id        String   @id
-  pageId    String
-  snapshot  String   @db.LongText
-  createdAt DateTime @default(now())
-  page      page     @relation(fields: [pageId], references: [id], onDelete: Cascade, map: "PageRevision_pageId_fkey")
+model SyncState {
+	id           String   @id @default(cuid())
+	clientId     String
+	cursor       String   @unique
+	lastSyncedAt DateTime @default(now())
+	createdAt    DateTime @default(now())
+	updatedAt    DateTime @updatedAt
 
-  @@index([pageId, createdAt], map: "PageRevision_pageId_createdAt_idx")
+	@@unique([clientId])
 }
 
-model syncstate {
-  id           String   @id
-  clientId     String   @unique(map: "SyncState_clientId_key")
-  cursor       String   @unique(map: "SyncState_cursor_key")
-  lastSyncedAt DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime
+model ChangeLog {
+	id         String   @id @default(cuid())
+	entityType String
+	entityId   String
+	action     String
+	payload    String
+	createdAt  DateTime @default(now())
+
+	@@index([entityType, entityId])
+	@@index([createdAt])
 }
