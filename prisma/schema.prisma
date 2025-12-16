@@ -13,7 +13,7 @@ model Folder {
 	parent      Folder?   @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
 	children    Folder[]  @relation("FolderHierarchy")
 	title       String
-	description String?
+	description String?   @db.Text
 	color       String?
 	position    Int       @default(0)
 	pages       Page[]
@@ -30,7 +30,7 @@ model Page {
 	title       String
 	slug        String?      @unique
 	position    Int          @default(0)
-	searchText  String       @default("")
+	searchText  String       @default("") @db.Text
 	isPinned    Boolean      @default(false)
 	isArchived  Boolean      @default(false)
 	content     PageContent?
@@ -39,16 +39,15 @@ model Page {
 	updatedAt   DateTime     @updatedAt
 
 	@@index([folderId, position])
-	@@index([searchText])
 }
 
 model PageContent {
 	id         String   @id @default(cuid())
 	pageId     String   @unique
-	html       String   @default("")
-	json       String?
-	text       String   @default("")
-	canvasJson String?
+	html       String   @default("") @db.LongText
+	json       String?  @db.LongText
+	text       String   @default("") @db.Text
+	canvasJson String?  @db.LongText
 	createdAt  DateTime @default(now())
 	updatedAt  DateTime @updatedAt
 	page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
@@ -58,7 +57,7 @@ model PageRevision {
 	id        String   @id @default(cuid())
 	pageId    String
 	page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
-	snapshot  String
+	snapshot  String   @db.LongText
 	createdAt DateTime @default(now())
 
 	@@index([pageId, createdAt])
@@ -80,7 +79,7 @@ model ChangeLog {
 	entityType String
 	entityId   String
 	action     String
-	payload    String
+	payload    String   @db.LongText
 	createdAt  DateTime @default(now())
 
 	@@index([entityType, entityId])
