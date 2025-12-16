@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import { prisma } from '../lib/prisma.js';
 import { logger } from '../logger.js';
+import { serializeBigInt } from '../lib/serialize.js';
 
 type FolderInput = {
   title: string;
@@ -118,7 +119,7 @@ async function logChange(
       entityType: CHANGE_TYPES[entityType],
       entityId,
       action: CHANGE_ACTIONS[action],
-      payload: JSON.stringify(payload ?? {})
+      payload: JSON.stringify(serializeBigInt(payload ?? {}))
     }
   });
 }
@@ -200,11 +201,11 @@ async function upsertPageContent(
   const json = serialiseJson(content.json);
   const canvasJson = serialiseJson(content.canvas);
 
-  const existing = await tx.pagecontent.findUnique({ where: { pageId } });
+  const existing = await tx.pagecontent.findFirst({ where: { pageId } });
 
   if (existing) {
     const updated = await tx.pagecontent.update({
-      where: { pageId },
+      where: { id: existing.id },
       data: {
         html,
         text,
