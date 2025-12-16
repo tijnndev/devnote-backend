@@ -9,7 +9,7 @@ import {
   getNotebookTree,
   updateNotebook
 } from '../services/noteService.js';
-import { serializeBigInt } from '../lib/serialize';
+import { serializeBigInt } from '../lib/serialize.js';
 
 const createNotebookSchema = z.object({
   title: z.string().min(1),

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 import { fetchChanges, getSyncState, upsertSyncState } from '../services/noteService.js';
-import { serializeBigInt } from '../lib/serialize';
+import { serializeBigInt } from '../lib/serialize.js';
 
 const checkpointSchema = z.object({
   clientId: z.string().min(3),

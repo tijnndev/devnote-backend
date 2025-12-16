@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 import { createFolder, deleteFolder, updateFolder } from '../services/noteService.js';
-import { serializeBigInt } from '../lib/serialize';
+import { serializeBigInt } from '../lib/serialize.js';
 
 const baseSchema = z.object({
 	title: z.string().min(1),

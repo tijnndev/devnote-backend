@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { getFolder, getWorkspaceTree } from '../services/noteService.js';
-import { serializeBigInt } from '../lib/serialize';
+import { serializeBigInt } from '../lib/serialize.js';
 
 export const workspaceRouter = Router();
 

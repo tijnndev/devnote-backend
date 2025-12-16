@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 import { searchPages } from '../services/noteService.js';
-import { serializeBigInt } from '../lib/serialize';
+import { serializeBigInt } from '../lib/serialize.js';
 
 const searchSchema = z.object({
   query: z.string().min(1),

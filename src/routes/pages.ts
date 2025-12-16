@@ -9,7 +9,7 @@ import {
   recordRevision,
   updatePage
 } from '../services/noteService.js';
-import { serializeBigInt } from '../lib/serialize';
+import { serializeBigInt } from '../lib/serialize.js';
 
 const contentSchema = z
   .object({
