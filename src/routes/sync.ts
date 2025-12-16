@@ -49,7 +49,7 @@ syncRouter.get('/changes', async (req, res, next) => {
   try {
     const { after, limit } = changesSchema.parse(req.query);
     const changes = await fetchChanges(after, limit ?? 100);
-    const nextCursor = changes.at(-1)?.createdAt?.toISOString();
+    const nextCursor = changes.at(-1)?.createdAt;
 
     res.json({ changes: serializeBigInt(changes), cursor: nextCursor });
   } catch (error) {

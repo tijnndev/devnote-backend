@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 
+// TODO: These functions are not fully implemented yet
 import { deleteSection, updateSection } from '../services/noteService.js';
 
 const updateSchema = z.object({
