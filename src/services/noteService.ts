@@ -33,13 +33,13 @@ type PageInput = {
 
 type UpdatePageInput = Partial<PageInput>;
 
-type PageWithContent = Prisma.PageGetPayload<{
+type PageWithContent = Prisma.pageGetPayload<{
   include: {
     content: true;
   };
 }>;
 
-type FolderWithPages = Prisma.FolderGetPayload<{
+type FolderWithPages = Prisma.folderGetPayload<{
   include: {
     pages: {
       include: {
@@ -457,7 +457,7 @@ export async function fetchChanges(after?: string, limit = 100) {
     where: after
       ? {
           createdAt: {
-            gt: new Date(after)
+            gt: after
           }
         }
       : undefined,
@@ -475,7 +475,7 @@ export async function upsertSyncState(clientId: string, cursor: string) {
     },
     update: {
       cursor,
-      lastSyncedAt: new Date()
+      lastSyncedAt: new Date().toISOString()
     }
   });
 }

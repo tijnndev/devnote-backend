@@ -14,8 +14,8 @@ model folder {
   description String?  @db.Text
   color       String?  @db.Text
   position    Int      @default(0)
-  createdAt   BigInt
-  updatedAt   DateTime   @updatedAt
+  createdAt   BigInt   @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
+  updatedAt   DateTime @updatedAt
   parent      folder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   children    folder[] @relation("FolderHierarchy")
   pages       page[]
@@ -32,8 +32,8 @@ model page {
   searchText String         @default("") @db.Text
   isPinned   Boolean        @default(false)
   isArchived Boolean        @default(false)
-  createdAt  BigInt
-  updatedAt  DateTime         @updatedAt
+  createdAt  BigInt         @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
+  updatedAt  DateTime       @updatedAt
   folder     folder?        @relation(fields: [folderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   content    pagecontent[]
   revisions  pagerevision[]
@@ -42,15 +42,15 @@ model page {
 }
 
 model pagecontent {
-  id         String  @id @default(cuid())
-  pageId     String
-  html       String? @db.LongText
-  json       String? @db.LongText
-  text       String? @db.LongText
-  canvasJson String? @db.LongText
-  createdAt  BigInt
-  updatedAt  DateTime  @updatedAt
-  page       page    @relation(fields: [pageId], references: [id], onUpdate: Restrict)
+  id         String   @id @default(cuid())
+  pageId     String   @unique
+  html       String?  @db.LongText
+  json       String?  @db.LongText
+  text       String?  @db.LongText
+  canvasJson String?  @db.LongText
+  createdAt  BigInt   @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
+  updatedAt  DateTime @updatedAt
+  page       page     @relation(fields: [pageId], references: [id], onUpdate: Restrict)
 
   @@index([pageId], map: "pagecontent_pageId_fkey")
 }
@@ -59,18 +59,18 @@ model pagerevision {
   id        String @id @default(cuid())
   pageId    String
   snapshot  String @db.LongText
-  createdAt BigInt
+  createdAt BigInt @default(dbgenerated("(UNIX_TIMESTAMP() * 1000)"))
   page      page   @relation(fields: [pageId], references: [id], onUpdate: Restrict)
 
   @@index([pageId], map: "pagerevision_pageId_fkey")
 }
 
 model syncstate {
-  id           String @id @default(cuid())
-  clientId     String @db.Text
-  cursor       String @db.Text
-  lastSyncedAt String @default(dbgenerated("(current_timestamp())")) @db.Text
-  createdAt    String @default(dbgenerated("(current_timestamp())")) @db.Text
+  id           String   @id @default(cuid())
+  clientId     String   @unique @db.VarChar(255)
+  cursor       String   @db.Text
+  lastSyncedAt String   @default(dbgenerated("(current_timestamp())")) @db.Text
+  createdAt    String   @default(dbgenerated("(current_timestamp())")) @db.Text
   updatedAt    DateTime @updatedAt
 }
 
