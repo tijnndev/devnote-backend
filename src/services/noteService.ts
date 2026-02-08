@@ -201,25 +201,16 @@ async function upsertPageContent(
   const json = serialiseJson(content.json);
   const canvasJson = serialiseJson(content.canvas);
 
-  const existing = await tx.pagecontent.findFirst({ where: { pageId } });
-
-  if (existing) {
-    const updated = await tx.pagecontent.update({
-      where: { id: existing.id },
-      data: {
-        html,
-        text,
-        json,
-        canvasJson
-      }
-    });
-
-    await logChange(tx, 'pageContent', updated.id, 'update', updated);
-    return updated;
-  }
-
-  const created = await tx.pagecontent.create({
-    data: {
+  // Use upsert for better performance - single query instead of find + update/create
+  const result = await tx.pagecontent.upsert({
+    where: { pageId },
+    update: {
+      html,
+      text,
+      json,
+      canvasJson
+    },
+    create: {
       pageId,
       html,
       text,
@@ -228,8 +219,8 @@ async function upsertPageContent(
     }
   });
 
-  await logChange(tx, 'pageContent', created.id, 'create', created);
-  return created;
+  await logChange(tx, 'pageContent', result.id, 'update', result);
+  return result;
 }
 
 export async function getWorkspaceTree(): Promise<WorkspaceTree> {
