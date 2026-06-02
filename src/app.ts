@@ -10,11 +10,26 @@ import { createApiRouter } from './routes/index.js';
 
 export function createApp() {
   const app = express();
+  const allowedOrigins = new Set(env.ALLOWED_ORIGINS);
 
   app.use(helmet());
   app.use(
     cors({
-      origin: env.isDevelopment ? '*' : false,
+      origin: (origin, callback) => {
+        // Allow non-browser requests (curl, Postman, server-to-server)
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+
+        if (allowedOrigins.has(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        logger.warn({ origin }, 'Blocked by CORS allowlist');
+        callback(new Error('Not allowed by CORS'));
+      },
       credentials: true
     })
   );

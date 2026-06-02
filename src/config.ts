@@ -8,6 +8,15 @@ const envSchema = z
 		NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 		PORT: z.coerce.number().int().min(0).max(65535).default(4000),
 		DATABASE_URL: z.string().min(1).default('file:./devnote.db'),
+		ALLOWED_ORIGINS: z
+			.string()
+			.default('http://localhost:5173,http://localhost:4173')
+			.transform((value) =>
+				value
+					.split(',')
+					.map((origin) => origin.trim())
+					.filter((origin) => origin.length > 0)
+			),
 		API_KEY: z
 			.string()
 			.trim()
