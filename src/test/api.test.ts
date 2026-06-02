@@ -128,4 +128,47 @@ describe('DevNote API', () => {
     const stateRes = await request(app).get('/api/sync/state/web-client').expect(200);
     expect(stateRes.body.state.cursor).toBe(cursor);
   });
+
+  it('returns task-list todos grouped by page', async () => {
+    const app = buildApp();
+
+    const pageRes = await request(app)
+      .post('/api/pages')
+      .send({
+        title: 'Todo Page',
+        content: {
+          text: 'Buy milk Ship release',
+          json: {
+            type: 'doc',
+            content: [
+              {
+                type: 'taskList',
+                content: [
+                  {
+                    type: 'taskItem',
+                    attrs: { checked: false },
+                    content: [{ type: 'text', text: 'Buy milk' }]
+                  },
+                  {
+                    type: 'taskItem',
+                    attrs: { checked: true },
+                    content: [{ type: 'text', text: 'Ship release' }]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      })
+      .expect(201);
+
+    const todosRes = await request(app).get('/api/todos').expect(200);
+    expect(Array.isArray(todosRes.body.todos)).toBe(true);
+
+    const pageTodos = todosRes.body.todos.find((item: { pageId: string }) => item.pageId === pageRes.body.page.id);
+    expect(pageTodos).toBeDefined();
+    expect(pageTodos.todos).toHaveLength(2);
+    expect(pageTodos.todos[0].text).toBe('Buy milk');
+    expect(pageTodos.todos[0].checked).toBe(false);
+  });
 });

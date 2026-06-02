@@ -443,6 +443,96 @@ export async function searchPages(query: string, limit = 20) {
   }));
 }
 
+// ── Todo helpers ──────────────────────────────────────────────────────────────
+
+function isObj(val: unknown): val is Record<string, unknown> {
+  return typeof val === 'object' && val !== null;
+}
+
+function extractNodeText(node: unknown): string {
+  if (!isObj(node)) return '';
+  if (node.type === 'text' && typeof node.text === 'string') return node.text;
+  if (Array.isArray(node.content)) {
+    return (node.content as unknown[]).map(extractNodeText).join('');
+  }
+  return '';
+}
+
+function extractTaskItems(
+  node: unknown,
+  items: { checked: boolean; text: string }[] = []
+): { checked: boolean; text: string }[] {
+  if (!isObj(node)) return items;
+
+  if (node.type === 'taskItem') {
+    const attrs = isObj(node.attrs) ? node.attrs : {};
+    const checked = attrs.checked === true || attrs.checked === 'true';
+    items.push({ checked, text: extractNodeText(node) });
+    // Don't recurse into the taskItem itself — content already visited above
+    return items;
+  }
+
+  if (Array.isArray(node.content)) {
+    for (const child of node.content as unknown[]) {
+      extractTaskItems(child, items);
+    }
+  }
+
+  return items;
+}
+
+export type TodoItem = { checked: boolean; text: string };
+
+export type PageTodos = {
+  pageId: string;
+  pageTitle: string;
+  folderId: string | null;
+  folderTitle: string | null;
+  todos: TodoItem[];
+};
+
+export async function getTodos(): Promise<PageTodos[]> {
+  const rows = (await prisma.$queryRawUnsafe(
+    `SELECT p.id, p.title, p.folderId, f.title as folderTitle, pc.json as contentJson
+     FROM page p
+     LEFT JOIN folder f ON f.id = p.folderId
+     LEFT JOIN pagecontent pc ON pc.pageId = p.id
+     WHERE pc.json IS NOT NULL AND pc.json LIKE '%"taskItem"%'
+     ORDER BY COALESCE(f.title, '') ASC, p.title ASC`
+  )) as Array<{
+    id: string;
+    title: string;
+    folderId: string | null;
+    folderTitle: string | null;
+    contentJson: string | null;
+  }>;
+
+  const result: PageTodos[] = [];
+
+  for (const row of rows) {
+    if (!row.contentJson) continue;
+    try {
+      const doc = JSON.parse(row.contentJson) as unknown;
+      const todos = extractTaskItems(doc);
+      if (todos.length > 0) {
+        result.push({
+          pageId: row.id,
+          pageTitle: row.title,
+          folderId: row.folderId,
+          folderTitle: row.folderTitle,
+          todos,
+        });
+      }
+    } catch {
+      // skip pages with invalid JSON content
+    }
+  }
+
+  return result;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+
 export async function fetchChanges(after?: string, limit = 100) {
   return prisma.changelog.findMany({
     where: after
